@@ -5,25 +5,6 @@
 }
 
 :root {
-    --primary-bg: #ffffff;
-    --secondary-bg: #f8f9fa;
-    --text-primary: #212529;
-    --text-secondary: #6c757d;
-    --accent-color: #0d6efd;
-    --border-shade: #dee2e6;
-    --card-bg: #ffffff;
-    --shadow-subtle: rgba(0, 0, 0, 0.1);
-}
-
-[data-appearance="night"] {
-    --primary-bg: #1a1d23;
-    --secondary-bg: #25292f;
-    --text-primary: #e9ecef;
-    --text-secondary: #adb5bd;
-    --accent-color: #4dabf7;
-    --border-shade: #495057;
-    --card-bg: #2d3139;
-    --shadow-subtle: rgba(0, 0, 0, 0.3);
     --primary-tone: #2c3e50;
     --accent-tone: #3498db;
     --light-bg: #ecf0f1;
@@ -36,26 +17,6 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: var(--primary-bg);
-    color: var(--text-primary);
-    line-height: 1.6;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.page-header {
-    background-color: var(--secondary-bg);
-    border-bottom: 1px solid var(--border-shade);
-    padding: 1.5rem 0;
-    transition: background-color 0.3s ease;
-}
-
-.page-header .container {
     line-height: 1.6;
     color: var(--text-primary);
     background-color: var(--light-bg);
@@ -78,72 +39,6 @@ body {
     align-items: center;
 }
 
-.brand-title {
-    font-size: 2rem;
-    color: var(--accent-color);
-    font-weight: 700;
-}
-
-.appearance-toggle {
-    background: none;
-    border: 2px solid var(--border-shade);
-    border-radius: 50px;
-    padding: 8px 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.2rem;
-    transition: all 0.3s ease;
-}
-
-.appearance-toggle:hover {
-    transform: scale(1.05);
-    border-color: var(--accent-color);
-}
-
-[data-appearance="day"] .icon-moon {
-    display: none;
-}
-
-[data-appearance="night"] .icon-sun {
-    display: none;
-}
-
-.content-area {
-    min-height: calc(100vh - 200px);
-}
-
-.hero-section {
-    background-color: var(--secondary-bg);
-    padding: 4rem 0;
-    text-align: center;
-    transition: background-color 0.3s ease;
-}
-
-.welcome-heading {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-}
-
-.tagline {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-}
-
-.tools-grid {
-    padding: 4rem 0;
-}
-
-.tools-grid h3 {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 3rem;
-    color: var(--text-primary);
-}
-
-.grid-layout {
 .site-title {
     font-size: 1.8rem;
     font-weight: 700;
@@ -222,37 +117,6 @@ body {
     gap: 2rem;
 }
 
-.tool-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-shade);
-    border-radius: 8px;
-    padding: 2rem;
-    box-shadow: 0 2px 8px var(--shadow-subtle);
-    transition: all 0.3s ease;
-}
-
-.tool-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 16px var(--shadow-subtle);
-}
-
-.tool-card h4 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--accent-color);
-}
-
-.tool-card p {
-    color: var(--text-secondary);
-}
-
-.page-footer {
-    background-color: var(--secondary-bg);
-    border-top: 1px solid var(--border-shade);
-    padding: 2rem 0;
-    text-align: center;
-    color: var(--text-secondary);
-    transition: background-color 0.3s ease;
 .project-card {
     background-color: var(--white-bg);
     border-radius: 12px;
