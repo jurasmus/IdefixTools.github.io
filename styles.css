@@ -10,7 +10,7 @@
     --text-light: #999999;
     --bg-primary: #ffffff;
     --bg-secondary: #f8f8f8;
-    --accent: #0066cc;
+    --accent: #0052a3;
     --border: #e0e0e0;
     --shadow: rgba(0, 0, 0, 0.05);
 }
@@ -209,7 +209,7 @@ body {
 
 .social-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 2.5rem;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -255,6 +255,11 @@ body {
 .social-link.youtube:hover {
     background-color: #ffe7e7;
     color: #ff3333;
+}
+
+.social-link.wiki:hover {
+    background-color: #f0f4ff;
+    color: #0052a3;
 }
 
 /* Footer */
