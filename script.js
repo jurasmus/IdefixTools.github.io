@@ -1,12 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Dark mode toggle
     const darkModeToggle = document.getElementById('darkModeToggle');
-    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+    const darkModePreference = localStorage.getItem('darkMode');
     
-    if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-        updateDarkModeIcon();
+    // If user has previously disabled dark mode, disable it now
+    if (darkModePreference === 'disabled') {
+        document.body.classList.remove('dark-mode');
     }
+    
+    updateDarkModeIcon();
     
     darkModeToggle.addEventListener('click', function() {
         document.body.classList.toggle('dark-mode');
