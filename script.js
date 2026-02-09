@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+    
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        updateDarkModeIcon();
+    }
+    
+    darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const isEnabled = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isEnabled ? 'enabled' : 'disabled');
+        updateDarkModeIcon();
+    });
+    
+    function updateDarkModeIcon() {
+        const icon = darkModeToggle.querySelector('i');
+        if (document.body.classList.contains('dark-mode')) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
+
     // Smooth scroll for CTA buttons
     const buttons = document.querySelectorAll('a[href^="#"]');
     
