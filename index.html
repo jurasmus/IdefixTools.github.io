@@ -4,20 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Julian Rasmussen - Identity & Access Engineer</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-mode">
+
     <header class="site-header">
         <div class="header-content">
             <div class="header-left">
-                <h1 class="site-title">Julian Rasmussen</h1>
-                <p class="header-tagline">Microsoft MVP within Identity & Access Management</p>
+                <div class="name-row">
+                    <h1 class="site-title">Julian Rasmussen</h1>
+                    <span class="mvp-badge">
+                        <i class="fas fa-shield-halved"></i>
+                        MVP
+                    </span>
+                </div>
+                <p class="header-tagline">Identity & Access Management</p>
             </div>
             <nav class="header-nav">
-                <a href="#projects" class="nav-link">View Projects</a>
-                <a href="#contact" class="nav-link">Get In Touch</a>
-                <button id="darkModeToggle" class="nav-link dark-mode-btn" title="Toggle dark mode">
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <button id="darkModeToggle" class="dark-mode-btn" title="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
             </nav>
@@ -25,13 +32,29 @@
     </header>
 
     <main>
-        <section id="projects" class="projects-area">
+        <section class="hero" data-reveal>
+            <div class="hero-content">
+                <span class="hero-label">Microsoft Most Valuable Professional</span>
+                <h2 class="hero-heading">Securing digital identities<br><span class="hero-accent">with precision.</span></h2>
+                <p class="hero-sub">Building tools and systems that protect, automate, and simplify identity governance across the Microsoft ecosystem.</p>
+                <div class="hero-ctas">
+                    <a href="#projects" class="btn-primary">Explore projects</a>
+                    <a href="#contact" class="btn-secondary">Get in touch</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="projects-area" data-reveal>
             <div class="section-wrapper">
                 <h2 class="section-heading">Featured Projects</h2>
+                <p class="section-sub">Tools and platforms built around identity governance</p>
                 <div class="projects-list">
-                    <article class="project-item">
+
+                    <article class="project-item" data-reveal>
+                        <div class="project-number">01</div>
                         <div class="project-content">
-                            <h3 class="project-title">IdefixHR - A Modern, Identity-Driven HR Platform</h3>
+                            <h3 class="project-title">IdefixHR</h3>
+                            <p class="project-subtitle">A Modern, Identity-Driven HR Platform</p>
                             <p class="project-description" data-full-text="IdefixHR is a lightweight, intelligent HR system built for organizations that want full control over their employee lifecycle while reducing manual administration. Designed with an identity‑first mindset, IdefixHR seamlessly connects HR data with Microsoft Entra ID through secure provisioning APIs, ensuring that employee information is always accurate, synchronized, and protected. IdefixHR acts as the central source of truth for your workforce, combining HR master data, salary details, and identity governance into one streamlined platform.">
                                 <span class="short-text">IdefixHR is a lightweight, intelligent HR system built for organizations that want full control over their employee lifecycle while reducing manual administration<span class="ellipsis">...</span></span>
                                 <a href="#" class="read-more-link">read more</a>
@@ -43,11 +66,14 @@
                             </div>
                         </div>
                         <div class="project-action">
-                            <a href="https://idefixtools.com/" class="project-link" target="_blank" rel="noopener">Comming soon →</a>
+                            <a href="https://idefixtools.com/" class="project-link" target="_blank" rel="noopener">
+                                Coming soon <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </article>
 
-                    <article class="project-item">
+                    <article class="project-item" data-reveal>
+                        <div class="project-number">02</div>
                         <div class="project-content">
                             <h3 class="project-title">PowerShell Automation Suite</h3>
                             <p class="project-description">
@@ -60,11 +86,14 @@
                             </div>
                         </div>
                         <div class="project-action">
-                            <a href="https://github.com/jurasmusmusren/github" class="project-link" target="_blank" rel="noopener">View →</a>
+                            <a href="https://github.com/jurasmusmusren/github" class="project-link" target="_blank" rel="noopener">
+                                View project <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </article>
 
-                    <article class="project-item">
+                    <article class="project-item" data-reveal>
+                        <div class="project-number">03</div>
                         <div class="project-content">
                             <h3 class="project-title">Development Tools & Resources</h3>
                             <p class="project-description">
@@ -77,35 +106,38 @@
                             </div>
                         </div>
                         <div class="project-action">
-                            <a href="https://github.com/jurasmusmusren/github" class="project-link" target="_blank" rel="noopener">View →</a>
+                            <a href="https://github.com/jurasmusmusren/github" class="project-link" target="_blank" rel="noopener">
+                                View project <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
                     </article>
+
                 </div>
             </div>
         </section>
 
-        <section id="contact" class="contact-area">
+        <section id="contact" class="contact-area" data-reveal>
             <div class="section-wrapper">
                 <h2 class="section-heading">Get In Touch</h2>
-                <p class="contact-text">Connect with me on these platforms</p>
+                <p class="contact-text">Have questions or want to collaborate? Reach out!</p>
                 <div class="social-links">
-                    <a href="https://idefixwiki.no" class="social-link wiki" target="_blank" rel="noopener" title="IdefixWiki">
+                    <a href="https://idefixwiki.no" class="social-link" target="_blank" rel="noopener" title="IdefixWiki">
                         <i class="fas fa-book"></i>
                         <span>IdefixWiki</span>
                     </a>
-                    <a href="https://github.com/jurasmus" class="social-link github" target="_blank" rel="noopener" title="GitHub">
+                    <a href="https://github.com/jurasmus" class="social-link" target="_blank" rel="noopener" title="GitHub">
                         <i class="fab fa-github"></i>
                         <span>GitHub</span>
                     </a>
-                    <a href="https://www.linkedin.com/in/julianrasmussen" class="social-link linkedin" target="_blank" rel="noopener" title="LinkedIn">
+                    <a href="https://www.linkedin.com/in/julianrasmussen" class="social-link" target="_blank" rel="noopener" title="LinkedIn">
                         <i class="fab fa-linkedin"></i>
                         <span>LinkedIn</span>
                     </a>
-                    <a href="https://x.com/JulianRasmussen" class="social-link twitter" target="_blank" rel="noopener" title="X (Twitter)">
+                    <a href="https://x.com/JulianRasmussen" class="social-link" target="_blank" rel="noopener" title="X (Twitter)">
                         <i class="fab fa-x-twitter"></i>
                         <span>x.com</span>
                     </a>
-                    <a href="https://www.youtube.com/@Julianrasmussen" class="social-link youtube" target="_blank" rel="noopener" title="YouTube">
+                    <a href="https://www.youtube.com/@Julianrasmussen" class="social-link" target="_blank" rel="noopener" title="YouTube">
                         <i class="fab fa-youtube"></i>
                         <span>YouTube</span>
                     </a>
@@ -115,7 +147,9 @@
     </main>
 
     <footer class="site-footer">
-        <p>&copy; 2026 Julian Rasmussen. All rights reserved.</p>
+        <div class="footer-content">
+            <p>&copy; 2026 Julian Rasmussen. All rights reserved.</p>
+        </div>
     </footer>
 
     <script src="script.js"></script>
