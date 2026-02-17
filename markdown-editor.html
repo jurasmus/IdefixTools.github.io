@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor — IdefixTools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="markdown-editor.css">
+</head>
+<body class="dark-mode">
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="name-row">
+                    <h1 class="site-title">Julian Rasmussen</h1>
+                    <span class="mvp-badge">
+                        <i class="fas fa-shield-halved"></i>
+                        MVP
+                    </span>
+                </div>
+                <p class="header-tagline">Identity & Access Management</p>
+            </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="index.html#projects" class="nav-link">Projects</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+                <button id="darkModeToggle" class="dark-mode-btn" title="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="editor-main">
+        <div class="editor-header-bar">
+            <div class="editor-title-section">
+                <h2 class="editor-page-title"><i class="fas fa-file-pen"></i> Markdown Blog Editor</h2>
+                <p class="editor-page-sub">Create rich blog posts with live preview and export to Markdown</p>
+            </div>
+            <div class="editor-actions-top">
+                <div class="filename-input-group">
+                    <label for="filenameInput"><i class="fas fa-file-signature"></i></label>
+                    <input type="text" id="filenameInput" placeholder="my-blog-post" spellcheck="false">
+                    <span class="filename-ext">.md</span>
+                </div>
+                <button id="exportMdBtn" class="btn-export" title="Export Markdown file">
+                    <i class="fas fa-download"></i> Export .md
+                </button>
+                <button id="exportAllBtn" class="btn-export btn-export-all" title="Export Markdown + images as ZIP">
+                    <i class="fas fa-file-zipper"></i> Export All
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="h1" title="Heading 1"><b>H1</b></button>
+                <button class="toolbar-btn" data-action="h2" title="Heading 2"><b>H2</b></button>
+                <button class="toolbar-btn" data-action="h3" title="Heading 3"><b>H3</b></button>
+                <button class="toolbar-btn" data-action="h4" title="Heading 4"><b>H4</b></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="bold" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                <button class="toolbar-btn" data-action="italic" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                <button class="toolbar-btn" data-action="strikethrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                <button class="toolbar-btn" data-action="code" title="Inline Code"><i class="fas fa-code"></i></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="ul" title="Unordered List"><i class="fas fa-list-ul"></i></button>
+                <button class="toolbar-btn" data-action="ol" title="Ordered List"><i class="fas fa-list-ol"></i></button>
+                <button class="toolbar-btn" data-action="checklist" title="Checklist"><i class="fas fa-square-check"></i></button>
+                <button class="toolbar-btn" data-action="blockquote" title="Blockquote"><i class="fas fa-quote-left"></i></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="link" title="Insert Link"><i class="fas fa-link"></i></button>
+                <button class="toolbar-btn" data-action="image" title="Insert Image"><i class="fas fa-image"></i></button>
+                <button class="toolbar-btn" data-action="table" title="Insert Table"><i class="fas fa-table"></i></button>
+                <button class="toolbar-btn" data-action="codeblock" title="Code Block"><i class="fas fa-file-code"></i></button>
+                <button class="toolbar-btn" data-action="hr" title="Horizontal Rule"><i class="fas fa-minus"></i></button>
+            </div>
+            <div class="toolbar-divider"></div>
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="toc" title="Insert Table of Contents"><i class="fas fa-bars-staggered"></i> TOC</button>
+            </div>
+        </div>
+
+        <!-- Editor Panels -->
+        <div class="editor-container">
+            <div class="editor-pane">
+                <div class="pane-header">
+                    <span><i class="fas fa-pencil"></i> Editor</span>
+                    <span class="char-count" id="charCount">0 chars</span>
+                </div>
+                <textarea id="markdownInput" placeholder="Start writing your blog post here...&#10;&#10;Use the toolbar above or write Markdown directly.&#10;&#10;# My Blog Post Title&#10;&#10;Start your content here..." spellcheck="true"></textarea>
+            </div>
+            <div class="preview-pane">
+                <div class="pane-header">
+                    <span><i class="fas fa-eye"></i> Preview</span>
+                    <button id="copyHtmlBtn" class="toolbar-btn toolbar-btn-sm" title="Copy HTML">
+                        <i class="fas fa-clipboard"></i>
+                    </button>
+                </div>
+                <div id="markdownPreview" class="preview-content">
+                    <p class="preview-placeholder">Your rendered blog post will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Images panel -->
+        <div class="images-panel">
+            <div class="images-panel-header">
+                <h3><i class="fas fa-images"></i> Attached Images</h3>
+                <label class="btn-upload" for="imageUpload">
+                    <i class="fas fa-plus"></i> Add Image
+                    <input type="file" id="imageUpload" accept="image/*" multiple hidden>
+                </label>
+            </div>
+            <div id="imageGallery" class="image-gallery">
+                <p class="gallery-placeholder">No images attached yet. Upload images to reference them in your post.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Image insert modal -->
+    <div id="imageModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-image"></i> Insert Image</h3>
+                <button class="modal-close" id="imageModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="upload">Upload</button>
+                    <button class="modal-tab" data-tab="url">From URL</button>
+                    <button class="modal-tab" data-tab="gallery">Gallery</button>
+                </div>
+                <div class="modal-tab-content" id="tabUpload">
+                    <label class="upload-zone" id="dropZone">
+                        <i class="fas fa-cloud-arrow-up"></i>
+                        <span>Drag & drop an image here or click to browse</span>
+                        <input type="file" id="modalImageUpload" accept="image/*" hidden>
+                    </label>
+                </div>
+                <div class="modal-tab-content" id="tabUrl" style="display:none;">
+                    <input type="text" id="imageUrlInput" class="modal-input" placeholder="https://example.com/image.png">
+                </div>
+                <div class="modal-tab-content" id="tabGallery" style="display:none;">
+                    <div id="modalGallery" class="modal-gallery">
+                        <p class="gallery-placeholder">No uploaded images yet.</p>
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>Alt Text</label>
+                    <input type="text" id="imageAltInput" class="modal-input" placeholder="Description of the image">
+                </div>
+                <div class="modal-field">
+                    <label>
+                        <input type="checkbox" id="imageAsHeader"> Use as header image
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary-sm" id="imageModalCancel">Cancel</button>
+                <button class="btn-primary-sm" id="imageModalInsert">Insert Image</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link insert modal -->
+    <div id="linkModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-box-sm">
+            <div class="modal-header">
+                <h3><i class="fas fa-link"></i> Insert Link</h3>
+                <button class="modal-close" id="linkModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Link Text</label>
+                    <input type="text" id="linkTextInput" class="modal-input" placeholder="Link text">
+                </div>
+                <div class="modal-field">
+                    <label>URL</label>
+                    <input type="text" id="linkUrlInput" class="modal-input" placeholder="https://example.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary-sm" id="linkModalCancel">Cancel</button>
+                <button class="btn-primary-sm" id="linkModalInsert">Insert Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table insert modal -->
+    <div id="tableModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-box-sm">
+            <div class="modal-header">
+                <h3><i class="fas fa-table"></i> Insert Table</h3>
+                <button class="modal-close" id="tableModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field-row">
+                    <div class="modal-field">
+                        <label>Columns</label>
+                        <input type="number" id="tableColsInput" class="modal-input" value="3" min="1" max="10">
+                    </div>
+                    <div class="modal-field">
+                        <label>Rows</label>
+                        <input type="number" id="tableRowsInput" class="modal-input" value="3" min="1" max="20">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary-sm" id="tableModalCancel">Cancel</button>
+                <button class="btn-primary-sm" id="tableModalInsert">Insert Table</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Julian Rasmussen. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="markdown-editor.js"></script>
+</body>
+</html>
