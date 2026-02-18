@@ -130,6 +130,27 @@
     color: #0d0f1a;
 }
 
+.btn-clear {
+    background: transparent;
+    color: #e74c3c;
+    border: 1.5px solid #e74c3c;
+}
+
+.btn-clear:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.dark-mode .btn-clear {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+.dark-mode .btn-clear:hover {
+    background: #ff6b6b;
+    color: #0d0f1a;
+}
+
 /* ---- Toolbar ---- */
 
 .editor-toolbar {

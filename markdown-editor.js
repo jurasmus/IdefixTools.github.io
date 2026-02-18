@@ -684,6 +684,37 @@
     }
 
     // ========================================
+    //  Clear All
+    // ========================================
+
+    $('#clearAllBtn').addEventListener('click', function () {
+        const hasContent = markdownInput.value.trim() !== '' || state.images.length > 0;
+        if (!hasContent) {
+            showToast('Nothing to clear', 'fa-info-circle');
+            return;
+        }
+        if (!confirm('Are you sure you want to clear all content and uploaded images? This cannot be undone.')) return;
+
+        // Clear editor content
+        markdownInput.value = '';
+        filenameInput.value = '';
+
+        // Clear images
+        state.images = [];
+        state.selectedGalleryId = null;
+        imageCounter = 0;
+
+        // Clear localStorage
+        localStorage.removeItem(STORAGE_KEY);
+
+        // Refresh UI
+        refreshImageGallery();
+        updatePreview();
+
+        showToast('All content and images cleared', 'fa-check-circle');
+    });
+
+    // ========================================
     //  Auto-save to localStorage
     // ========================================
 
