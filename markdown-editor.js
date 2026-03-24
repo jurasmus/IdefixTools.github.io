@@ -802,4 +802,21 @@
     loadFromStorage();
     updatePreview();
 
+    // ---- Sticky toolbar shadow indicator ----
+    (function () {
+        var toolbar = $('.editor-toolbar');
+        if (!toolbar) return;
+        var sentinel = document.createElement('div');
+        sentinel.style.height = '1px';
+        sentinel.style.width = '100%';
+        sentinel.style.pointerEvents = 'none';
+        sentinel.setAttribute('aria-hidden', 'true');
+        toolbar.parentNode.insertBefore(sentinel, toolbar);
+
+        var observer = new IntersectionObserver(function (entries) {
+            toolbar.classList.toggle('is-stuck', !entries[0].isIntersecting);
+        }, { threshold: 0, rootMargin: '-65px 0px 0px 0px' });
+        observer.observe(sentinel);
+    })();
+
 })();
