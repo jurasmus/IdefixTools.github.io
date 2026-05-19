@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entra ID Tenant Lookup — IdefixTools</title>
+    <meta name="description" content="Resolve a Microsoft Entra ID tenant GUID to its organization metadata: region, cloud instance, issuer and authority endpoints.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tenant-lookup.css">
+</head>
+<body class="dark-mode">
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="name-row">
+                    <h1 class="site-title">Julian Rasmussen</h1>
+                    <span class="mvp-badge">
+                        <i class="fas fa-shield-halved"></i>
+                        MVP
+                    </span>
+                </div>
+                <p class="header-tagline">Identity & Access Management</p>
+            </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="index.html#projects" class="nav-link">Projects</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+                <button id="darkModeToggle" class="dark-mode-btn" title="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="tl-main">
+        <section class="tl-hero">
+            <span class="hero-label">Public Reverse Lookup</span>
+            <h2 class="tl-title"><i class="fas fa-id-badge"></i> Entra ID Tenant Lookup</h2>
+            <p class="tl-sub">
+                Resolve a Microsoft Entra ID tenant <strong>GUID</strong> to its organization metadata —
+                cloud instance, region, issuer URL and OAuth/OpenID authority endpoints. Powered by Microsoft's
+                public OpenID Connect discovery endpoints.
+            </p>
+        </section>
+
+        <section class="tl-form-card">
+            <label for="tenantInput" class="tl-label">Tenant ID</label>
+            <div class="tl-input-row">
+                <div class="tl-input-wrap">
+                    <i class="fas fa-fingerprint tl-input-icon"></i>
+                    <input
+                        type="text"
+                        id="tenantInput"
+                        placeholder="72f988bf-86f1-41af-91ab-2d7cd011db47"
+                        spellcheck="false"
+                        autocomplete="off"
+                        autocapitalize="off"
+                    />
+                </div>
+                <button id="lookupBtn" class="tl-btn-primary">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <span>Look up</span>
+                </button>
+            </div>
+
+            <div class="tl-examples">
+                <span class="tl-examples-label">Try an example:</span>
+                <button class="tl-chip" data-example="72f988bf-86f1-41af-91ab-2d7cd011db47">Microsoft</button>
+                <button class="tl-chip" data-example="9188040d-6c67-4c5b-b112-36a304b66dad">Personal MSA</button>
+                <button class="tl-chip" data-example="f8cdef31-a31e-4b4a-93e4-5f571e91255a">Microsoft Services</button>
+            </div>
+
+            <p class="tl-disclaimer">
+                <i class="fas fa-circle-info"></i>
+                Only public, unauthenticated metadata is queried. No data is stored — the lookup runs entirely in your browser.
+            </p>
+        </section>
+
+        <section id="resultsSection" class="tl-results" hidden>
+            <!-- Status / errors -->
+            <div id="statusBox" class="tl-status" hidden></div>
+
+            <!-- Results card -->
+            <div id="resultsCard" class="tl-card" hidden>
+                <header class="tl-card-header">
+                    <div class="tl-card-title-wrap">
+                        <span class="tl-cloud-badge" id="cloudBadge">
+                            <i class="fas fa-cloud"></i>
+                            <span id="cloudBadgeText">—</span>
+                        </span>
+                        <h3 class="tl-card-title">Tenant Information</h3>
+                    </div>
+                    <button id="copyJsonBtn" class="tl-btn-ghost" title="Copy raw JSON">
+                        <i class="fas fa-copy"></i> Copy JSON
+                    </button>
+                </header>
+
+                <div class="tl-grid">
+                    <div class="tl-field">
+                        <span class="tl-field-label">Tenant ID</span>
+                        <span class="tl-field-value tl-mono" id="fTenantId">—</span>
+                    </div>
+                    <div class="tl-field">
+                        <span class="tl-field-label">Cloud Instance</span>
+                        <span class="tl-field-value" id="fCloudInstance">—</span>
+                    </div>
+                    <div class="tl-field">
+                        <span class="tl-field-label">Cloud Type</span>
+                        <span class="tl-field-value" id="fCloudType">—</span>
+                    </div>
+                    <div class="tl-field">
+                        <span class="tl-field-label">Tenant Region Scope</span>
+                        <span class="tl-field-value" id="fRegionScope">—</span>
+                    </div>
+                    <div class="tl-field">
+                        <span class="tl-field-label">Region Sub-Scope</span>
+                        <span class="tl-field-value" id="fRegionSubScope">—</span>
+                    </div>
+                    <div class="tl-field">
+                        <span class="tl-field-label">Tenant Region</span>
+                        <span class="tl-field-value" id="fRegion">—</span>
+                    </div>
+                    <div class="tl-field tl-field-wide">
+                        <span class="tl-field-label">Issuer</span>
+                        <span class="tl-field-value tl-mono" id="fIssuer">—</span>
+                    </div>
+                    <div class="tl-field tl-field-wide">
+                        <span class="tl-field-label">Authorization Endpoint</span>
+                        <span class="tl-field-value tl-mono" id="fAuthEndpoint">—</span>
+                    </div>
+                    <div class="tl-field tl-field-wide">
+                        <span class="tl-field-label">Token Endpoint</span>
+                        <span class="tl-field-value tl-mono" id="fTokenEndpoint">—</span>
+                    </div>
+                </div>
+
+                <!-- Display Name & Domains (requires auth) -->
+                <div class="tl-extra">
+                    <div class="tl-extra-header">
+                        <h4><i class="fas fa-building"></i> Display Name &amp; Verified Domains</h4>
+                        <span class="tl-extra-pill">Requires Graph sign-in</span>
+                    </div>
+                    <p class="tl-extra-text">
+                        Microsoft does not expose the organization's display name or verified domain list through
+                        public unauthenticated endpoints. Any Entra ID signed-in user can retrieve them via Microsoft
+                        Graph's <code>findTenantInformationByTenantId</code> action. Open the call below in
+                        Graph Explorer to view it:
+                    </p>
+                    <div class="tl-graph-block">
+                        <code class="tl-mono tl-graph-url" id="fGraphUrl">—</code>
+                        <a id="fGraphLink" href="#" target="_blank" rel="noopener" class="tl-btn-secondary">
+                            <i class="fas fa-up-right-from-square"></i> Open in Graph Explorer
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Raw JSON -->
+                <details class="tl-raw">
+                    <summary><i class="fas fa-code"></i> Raw OpenID Configuration</summary>
+                    <pre id="rawJson" class="tl-pre">{}</pre>
+                </details>
+            </div>
+        </section>
+
+        <section class="tl-about">
+            <h3><i class="fas fa-book-open"></i> How it works</h3>
+            <p>
+                Every Microsoft Entra ID tenant exposes a public OpenID Connect discovery document at
+                <code>https://login.microsoftonline.com/&lt;tenantId&gt;/v2.0/.well-known/openid-configuration</code>.
+                This tool fetches that document directly from your browser and surfaces the key fields:
+                cloud instance, tenant region, issuer and authority endpoints.
+            </p>
+            <ul class="tl-bullets">
+                <li><strong>Worldwide (Commercial):</strong> <code>login.microsoftonline.com</code></li>
+                <li><strong>US Government (GCC High / DoD):</strong> <code>login.microsoftonline.us</code></li>
+                <li><strong>China (operated by 21Vianet):</strong> <code>login.partner.microsoftonline.cn</code></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Julian Rasmussen. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="tenant-lookup.js"></script>
+</body>
+</html>

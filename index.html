@@ -23,6 +23,7 @@
             </div>
             <nav class="header-nav">
                 <a href="#projects" class="nav-link">Projects</a>
+                <a href="tenant-lookup.html" class="nav-link">Tenant Lookup</a>
                 <a href="markdown-editor.html" class="nav-link">MD Editor</a>
                 <a href="#contact" class="nav-link">Contact</a>
                 <button id="darkModeToggle" class="dark-mode-btn" title="Toggle dark mode">
@@ -90,6 +91,28 @@
                         <div class="project-action">
                             <a href="markdown-editor.html" class="project-link">
                                 Open editor <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="project-item" data-reveal>
+                        <div class="project-number">03</div>
+                        <div class="project-content">
+                            <h3 class="project-title">Entra ID Tenant Lookup</h3>
+                            <p class="project-subtitle">Reverse-resolve a tenant GUID to its organization metadata</p>
+                            <p class="project-description" data-full-text="A free, public reverse-lookup tool that takes a Microsoft Entra ID tenant GUID and resolves it to organization metadata using Microsoft's public OpenID Connect discovery endpoints. Returns the cloud instance (Commercial, US Government, China), tenant region scope, issuer URL, OAuth/OpenID authority endpoints and a deep-link to retrieve the display name and verified domains via Microsoft Graph. Runs entirely in the browser — no data is stored.">
+                                <span class="short-text">A free, public reverse-lookup tool that resolves a Microsoft Entra ID tenant GUID to its cloud instance, region, issuer and authority endpoints<span class="ellipsis">...</span></span>
+                                <a href="#" class="read-more-link">read more</a>
+                            </p>
+                            <div class="project-tags">
+                                <span class="tag">Entra ID</span>
+                                <span class="tag">OpenID Connect</span>
+                                <span class="tag">Identity</span>
+                            </div>
+                        </div>
+                        <div class="project-action">
+                            <a href="tenant-lookup.html" class="project-link">
+                                Open tool <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     </article>

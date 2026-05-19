@@ -1,0 +1,518 @@
+/* ========================================
+   Entra ID Tenant Lookup — Styles
+   Extends the main site theme
+   ======================================== */
+
+.tl-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ---- Hero ---- */
+.tl-hero {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.tl-hero .hero-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+}
+
+.tl-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    letter-spacing: -0.5px;
+}
+
+.tl-title i { color: var(--accent); }
+
+.tl-sub {
+    font-size: 1rem;
+    color: var(--text-mid);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.65;
+}
+
+.tl-sub strong { color: var(--text-dark); }
+
+/* ---- Form Card ---- */
+.tl-form-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+}
+
+.tl-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-light);
+    margin-bottom: 0.6rem;
+}
+
+.tl-input-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.tl-input-wrap {
+    flex: 1;
+    min-width: 260px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-light);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+
+.tl-input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.tl-input-icon {
+    color: var(--text-light);
+    padding: 0 0.85rem;
+    font-size: 0.95rem;
+}
+
+#tenantInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-dark);
+    font-family: 'SF Mono', Monaco, Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.95rem;
+    padding: 0.85rem 0.85rem 0.85rem 0;
+    letter-spacing: 0.3px;
+}
+
+#tenantInput::placeholder { color: var(--text-light); opacity: 0.7; }
+
+.tl-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent);
+    color: var(--bg-white);
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.tl-btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.tl-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tl-btn-primary .fa-spinner {
+    animation: tl-spin 0.8s linear infinite;
+}
+
+@keyframes tl-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---- Examples ---- */
+.tl-examples {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tl-examples-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-right: 0.25rem;
+}
+
+.tl-chip {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tl-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+.tl-disclaimer {
+    margin-top: 1.1rem;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.tl-disclaimer i { color: var(--accent); }
+
+/* ---- Status / Errors ---- */
+.tl-status {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.tl-status.is-error {
+    background: rgba(220, 80, 80, 0.1);
+    border: 1px solid rgba(220, 80, 80, 0.35);
+    color: #e87474;
+}
+
+.tl-status.is-info {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+/* ---- Result Card ---- */
+.tl-card {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-md);
+}
+
+.tl-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.tl-card-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.tl-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.tl-cloud-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tl-btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: var(--transition);
+}
+
+.tl-btn-ghost:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ---- Field Grid ---- */
+.tl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.5rem;
+}
+
+.tl-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.85rem 1rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 0;
+}
+
+.tl-field-wide { grid-column: 1 / -1; }
+
+.tl-field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-light);
+}
+
+.tl-field-value {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+.tl-mono {
+    font-family: 'SF Mono', Monaco, Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.85rem;
+}
+
+/* ---- Extra (Graph) ---- */
+.tl-extra {
+    margin-top: 1.75rem;
+    padding: 1.25rem;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: var(--bg-light);
+}
+
+.tl-extra-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+}
+
+.tl-extra-header h4 {
+    font-size: 1rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tl-extra-header h4 i { color: var(--accent); }
+
+.tl-extra-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: var(--bg-card);
+    color: var(--text-light);
+    border: 1px solid var(--border);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+}
+
+.tl-extra-text {
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 0.85rem;
+}
+
+.tl-extra-text code,
+.tl-bullets code,
+.tl-about code {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+    font-family: 'SF Mono', Monaco, Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent);
+}
+
+.tl-graph-block {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.tl-graph-url {
+    flex: 1;
+    min-width: 260px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    color: var(--text-mid);
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+}
+
+.tl-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--bg-card);
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.tl-btn-secondary:hover {
+    background: var(--accent);
+    color: var(--bg-white);
+}
+
+/* ---- Raw JSON ---- */
+.tl-raw {
+    margin-top: 1.5rem;
+}
+
+.tl-raw summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    padding: 0.5rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: var(--transition);
+}
+
+.tl-raw summary:hover { color: var(--accent); }
+.tl-raw summary i { color: var(--accent); }
+
+.tl-pre {
+    margin-top: 0.75rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'SF Mono', Monaco, Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+/* ---- About ---- */
+.tl-about {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.tl-about h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tl-about h3 i { color: var(--accent); }
+
+.tl-about p {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 0.85rem;
+}
+
+.tl-bullets {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.tl-bullets li {
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    padding-left: 1.1rem;
+    position: relative;
+}
+
+.tl-bullets li::before {
+    content: "▸";
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+}
+
+.tl-bullets strong { color: var(--text-dark); }
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+    .tl-title { font-size: 1.75rem; }
+    .tl-grid { grid-template-columns: 1fr; }
+    .tl-btn-primary { width: 100%; justify-content: center; }
+}
