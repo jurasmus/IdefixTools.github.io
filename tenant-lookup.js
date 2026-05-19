@@ -42,8 +42,6 @@
         cloudBadge:  document.getElementById('cloudBadgeText'),
         copyBtn:     document.getElementById('copyJsonBtn'),
         raw:         document.getElementById('rawJson'),
-        graphUrl:    document.getElementById('fGraphUrl'),
-        graphLink:   document.getElementById('fGraphLink'),
         f: {
             tenantId:      document.getElementById('fTenantId'),
             cloudInstance: document.getElementById('fCloudInstance'),
@@ -144,19 +142,6 @@
         els.f.issuer.textContent         = config.issuer || '—';
         els.f.authEndpoint.textContent   = config.authorization_endpoint || '—';
         els.f.tokenEndpoint.textContent  = config.token_endpoint || '—';
-
-        // Cloud badge
-        els.cloudBadge.textContent = cloud.type;
-
-        // Graph explorer deep link for display name & domains
-        const graphPath = `https://graph.microsoft.com/v1.0/tenantRelationships/findTenantInformationByTenantId(tenantId='${issuerTid}')`;
-        els.graphUrl.textContent = graphPath;
-        const explorer = new URL('https://developer.microsoft.com/en-us/graph/graph-explorer');
-        explorer.searchParams.set('request', `tenantRelationships/findTenantInformationByTenantId(tenantId='${issuerTid}')`);
-        explorer.searchParams.set('method', 'GET');
-        explorer.searchParams.set('version', 'v1.0');
-        explorer.searchParams.set('GraphUrl', 'https://graph.microsoft.com');
-        els.graphLink.href = explorer.toString();
 
         // Raw JSON
         els.raw.textContent = JSON.stringify(config, null, 2);
