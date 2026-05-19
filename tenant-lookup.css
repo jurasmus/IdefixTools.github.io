@@ -190,6 +190,14 @@
 
 .tl-disclaimer i { color: var(--accent); }
 
+.tl-disclaimer-note {
+    display: block;
+    margin-top: 0.4rem;
+    margin-left: 1.15rem;
+    color: var(--text-mid);
+    font-style: italic;
+}
+
 /* ---- Status / Errors ---- */
 .tl-status {
     padding: 1rem 1.25rem;
@@ -301,6 +309,18 @@
 }
 
 .tl-field-wide { grid-column: 1 / -1; }
+
+.tl-field-highlight {
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border-color: var(--accent);
+}
+
+.tl-field-large {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: var(--text-dark);
+}
 
 .tl-field-label {
     font-size: 0.7rem;

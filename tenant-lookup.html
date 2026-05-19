@@ -36,24 +36,24 @@
 
     <main class="tl-main">
         <section class="tl-hero">
-            <span class="hero-label">Public Reverse Lookup</span>
+            <span class="hero-label">Public Tenant Lookup</span>
             <h2 class="tl-title"><i class="fas fa-id-badge"></i> Entra ID Tenant Lookup</h2>
             <p class="tl-sub">
-                Resolve a Microsoft Entra ID tenant <strong>GUID</strong> to its organization metadata —
-                cloud instance, region, issuer URL and OAuth/OpenID authority endpoints. Powered by Microsoft's
-                public OpenID Connect discovery endpoints.
+                Resolve a Microsoft Entra ID tenant by <strong>GUID</strong> or <strong>domain name</strong>.
+                Returns organization name, default domain, cloud instance, region, issuer URL and authority endpoints —
+                all from Microsoft's public, unauthenticated discovery endpoints.
             </p>
         </section>
 
         <section class="tl-form-card">
-            <label for="tenantInput" class="tl-label">Tenant ID</label>
+            <label for="tenantInput" class="tl-label">Tenant ID or Domain</label>
             <div class="tl-input-row">
                 <div class="tl-input-wrap">
                     <i class="fas fa-fingerprint tl-input-icon"></i>
                     <input
                         type="text"
                         id="tenantInput"
-                        placeholder="72f988bf-86f1-41af-91ab-2d7cd011db47"
+                        placeholder="72f988bf-86f1-41af-91ab-2d7cd011db47  or  contoso.com"
                         spellcheck="false"
                         autocomplete="off"
                         autocapitalize="off"
@@ -67,13 +67,17 @@
 
             <div class="tl-examples">
                 <span class="tl-examples-label">Try an example:</span>
-                <button class="tl-chip" data-example="72f988bf-86f1-41af-91ab-2d7cd011db47">Microsoft</button>
-                <button class="tl-chip" data-example="a16fc97f-b36a-48da-bf02-258c0428d073">Idefix</button>
+                <button class="tl-chip" data-example="72f988bf-86f1-41af-91ab-2d7cd011db47">Microsoft (GUID)</button>
+                <button class="tl-chip" data-example="a16fc97f-b36a-48da-bf02-258c0428d073">Idefix (GUID)</button>
+                <button class="tl-chip" data-example="microsoft.com">microsoft.com</button>
+                <button class="tl-chip" data-example="idefix365.no">idefix365.no</button>
             </div>
 
             <p class="tl-disclaimer">
                 <i class="fas fa-circle-info"></i>
-                Only public, unauthenticated metadata is queried. No data is stored — the lookup runs entirely in your browser.
+                Lookup runs in your browser using Microsoft's public discovery endpoints. Organization name is
+                resolved through a small Idefix-hosted Azure Function that calls Microsoft Graph on your behalf.
+                No personal data is stored or logged.
             </p>
         </section>
 
@@ -97,6 +101,18 @@
                 </header>
 
                 <div class="tl-grid">
+                    <div class="tl-field tl-field-wide tl-field-highlight" id="fOrgNameWrap" hidden>
+                        <span class="tl-field-label">Organization Name</span>
+                        <span class="tl-field-value tl-field-large" id="fOrgName">—</span>
+                    </div>
+                    <div class="tl-field" id="fDomainWrap" hidden>
+                        <span class="tl-field-label">Queried Domain</span>
+                        <span class="tl-field-value" id="fDomain">—</span>
+                    </div>
+                    <div class="tl-field" id="fNamespaceWrap" hidden>
+                        <span class="tl-field-label">Namespace Type</span>
+                        <span class="tl-field-value" id="fNamespace">—</span>
+                    </div>
                     <div class="tl-field">
                         <span class="tl-field-label">Tenant ID</span>
                         <span class="tl-field-value tl-mono" id="fTenantId">—</span>
@@ -146,10 +162,15 @@
         <section class="tl-about">
             <h3><i class="fas fa-book-open"></i> How it works</h3>
             <p>
-                Every Microsoft Entra ID tenant exposes a public OpenID Connect discovery document at
-                <code>https://login.microsoftonline.com/&lt;tenantId&gt;/v2.0/.well-known/openid-configuration</code>.
-                This tool fetches that document directly from your browser and surfaces the key fields:
-                cloud instance, tenant region, issuer and authority endpoints.
+                <strong>By GUID:</strong> fetches the OpenID Connect discovery document at
+                <code>https://login.microsoftonline.com/&lt;tenantId&gt;/v2.0/.well-known/openid-configuration</code>
+                and surfaces cloud instance, tenant region, issuer and authority endpoints.
+            </p>
+            <p>
+                <strong>By domain:</strong> additionally queries <code>GetUserRealm.srf</code> which returns the
+                organization's <em>FederationBrandName</em> (display name), namespace type (Managed / Federated)
+                and verified primary domain. This is the same public endpoint Microsoft's own sign-in pages use
+                to look up tenant branding before authentication.
             </p>
             <ul class="tl-bullets">
                 <li><strong>Worldwide (Commercial):</strong> <code>login.microsoftonline.com</code></li>
