@@ -780,6 +780,14 @@
 
 .tl-email-fail i { color: #e87474; }
 
+.tl-email-warn {
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.4);
+    color: #e08600;
+}
+
+.tl-email-warn i { color: #e08600; }
+
 /* ---- DNS Section ---- */
 .tl-dns-section {
     margin-top: 1.5rem;
@@ -892,6 +900,16 @@
 
 .tl-dns-pill.tl-dns-warn i {
     color: #e87474;
+}
+
+.tl-dns-pill.tl-dns-softfail {
+    background: rgba(255, 140, 0, 0.08);
+    border-color: rgba(255, 140, 0, 0.4);
+    color: #e08600;
+}
+
+.tl-dns-pill.tl-dns-softfail i {
+    color: #e08600;
 }
 
 .tl-dns-warnings {

@@ -310,21 +310,28 @@
         const hasExchange = mxRecords && mxRecords.some(r => r.data && r.data.toLowerCase().includes('mail.protection.outlook.com'));
         if (hasExchange) services.exchange = true;
 
-        // SPF — always check (relevant for any domain that might send email)
+        // SPF — check for any valid SPF record; distinguish hardfail (-all) vs softfail (~all)
         const txtRecords = txt.status === 'fulfilled' ? txt.value : null;
-        const hasSpf = txtRecords && txtRecords.some(r => r.data && r.data.toLowerCase().includes('spf.protection.outlook.com'));
-        services.spf = !!hasSpf;
+        const spfRecord = txtRecords && txtRecords.find(r => r.data && r.data.toLowerCase().startsWith('v=spf1'));
+        if (spfRecord) {
+            const spfData = spfRecord.data.toLowerCase();
+            services.spf = spfData.includes('-all') ? 'hardfail' : 'softfail';
+        } else {
+            services.spf = false;
+        }
 
         // DMARC — always check
         const dmarcRecords = dmarc.status === 'fulfilled' ? dmarc.value : null;
-        const hasDmarc = dmarcRecords && dmarcRecords.some(r => r.data && r.data.toLowerCase().includes('v=dmarc'));
+        const hasDmarc = dmarcRecords && dmarcRecords.some(r => r.data && r.data.toLowerCase().startsWith('v=dmarc'));
         services.dmarc = !!hasDmarc;
 
-        // DKIM — always check (selector1 or selector2)
+        // DKIM — check Microsoft selectors (selector1/selector2) and common third-party selectors
         const dkim1Records = dkim1.status === 'fulfilled' ? dkim1.value : null;
         const dkim2Records = dkim2.status === 'fulfilled' ? dkim2.value : null;
-        const hasDkim = (dkim1Records && dkim1Records.length > 0) || (dkim2Records && dkim2Records.length > 0);
-        services.dkim = !!hasDkim;
+        const hasMsDkim = (dkim1Records && dkim1Records.length > 0) || (dkim2Records && dkim2Records.length > 0);
+        // Also check for a DKIM record via TXT (some providers publish DKIM in TXT at the root or _domainkey)
+        const hasTxtDkim = txtRecords && txtRecords.some(r => r.data && r.data.toLowerCase().includes('v=dkim1'));
+        services.dkim = !!(hasMsDkim || hasTxtDkim);
 
         // Teams / Skype for Business (SRV _sipfederationtls._tcp)
         const sipRecords = sip.status === 'fulfilled' ? sip.value : null;
@@ -572,7 +579,7 @@
         }
         if (svcWrap.children.length > 0) container.appendChild(svcWrap);
 
-        // Email security badges (always shown: pass or fail)
+        // Email security badges (always shown: pass, softfail, or fail)
         const emailKeys = ['spf', 'dmarc', 'dkim'];
         const hasAnyEmail = emailKeys.some(k => services[k] !== undefined);
         if (hasAnyEmail) {
@@ -582,7 +589,10 @@
                 if (services[key] === undefined) continue;
                 const info = SERVICE_ICONS[key];
                 const badge = document.createElement('span');
-                if (services[key]) {
+                if (services[key] === 'softfail') {
+                    badge.className = 'tl-email-tag tl-email-warn';
+                    badge.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${escapeHtml(info.label)} ~all`;
+                } else if (services[key]) {
                     badge.className = 'tl-email-tag tl-email-pass';
                     badge.innerHTML = `<i class="fas fa-circle-check"></i> ${escapeHtml(info.label)}`;
                 } else {
@@ -596,14 +606,20 @@
     }
 
     function renderDnsSummary(allServices, remaining) {
-        // Aggregate: found (true somewhere), missing (false somewhere and never true)
+        // Aggregate: found (truthy somewhere), softfail, missing (false somewhere)
         const found = {};
+        const softfail = {};
         const missing = {};
         const missingDomains = {}; // key → [domains where it's missing]
+        const softfailDomains = {}; // key → [domains with softfail]
 
         for (const [domain, svc] of Object.entries(allServices)) {
             for (const [key, value] of Object.entries(svc)) {
-                if (value === true) {
+                if (value === 'softfail') {
+                    softfail[key] = true;
+                    if (!softfailDomains[key]) softfailDomains[key] = [];
+                    softfailDomains[key].push(domain);
+                } else if (value === true || value === 'hardfail') {
                     found[key] = true;
                 } else if (value === false) {
                     if (!missingDomains[key]) missingDomains[key] = [];
@@ -611,7 +627,6 @@
                 }
             }
         }
-        // Only flag as "missing" if it's false on at least one domain
         for (const key of Object.keys(missingDomains)) {
             missing[key] = true;
         }
@@ -653,7 +668,7 @@
             emailBox.className = 'tl-dns-category';
             emailBox.innerHTML = '<h5><i class="fas fa-shield-halved"></i> Email Security Health</h5>';
 
-            const allPassed = SECURITY_CHECKS.every(k => found[k] && !missing[k]);
+            const allPassed = SECURITY_CHECKS.every(k => found[k] && !missing[k] && !softfail[k]);
 
             if (allPassed) {
                 const overall = document.createElement('div');
@@ -668,15 +683,20 @@
                 const info = SERVICE_ICONS[key];
                 if (!info) continue;
                 const pill = document.createElement('span');
-                if (found[key] && !missing[key]) {
-                    pill.className = 'tl-dns-pill tl-dns-ok';
-                    pill.innerHTML = `<i class="fas fa-circle-check"></i> ${escapeHtml(info.label)}`;
-                } else if (missing[key]) {
+                if (missing[key]) {
                     const domains = missingDomains[key] || [];
                     pill.className = 'tl-dns-pill tl-dns-warn';
                     pill.title = 'Missing on: ' + domains.join(', ');
                     pill.innerHTML = `<i class="fas fa-circle-xmark"></i> ${escapeHtml(info.label)} missing` +
                         (domains.length === 1 ? ` on ${escapeHtml(domains[0])}` : ` on ${domains.length} domain${domains.length > 1 ? 's' : ''}`);
+                } else if (softfail[key]) {
+                    const domains = softfailDomains[key] || [];
+                    pill.className = 'tl-dns-pill tl-dns-softfail';
+                    pill.title = 'SoftFail (~all) on: ' + domains.join(', ');
+                    pill.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${escapeHtml(info.label)} ~all (SoftFail)`;
+                } else if (found[key]) {
+                    pill.className = 'tl-dns-pill tl-dns-ok';
+                    pill.innerHTML = `<i class="fas fa-circle-check"></i> ${escapeHtml(info.label)}`;
                 }
                 pills.appendChild(pill);
             }
