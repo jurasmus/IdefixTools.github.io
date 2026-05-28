@@ -294,6 +294,9 @@
         } catch { return null; }
     }
 
+    // Returns an object where each key is true (found), false (missing), or undefined (not applicable).
+    // Email security checks (spf, dmarc, dkim) are always checked for all domains.
+    // Service checks (exchange, teams, intune, aadConnect) are true when found, omitted when not.
     async function detectServicesForDomain(domain) {
         const services = {};
 
@@ -311,28 +314,24 @@
 
         // Exchange Online (MX points to *.mail.protection.outlook.com)
         const mxRecords = mx.status === 'fulfilled' ? mx.value : null;
-        if (mxRecords && mxRecords.some(r => r.data && r.data.toLowerCase().includes('mail.protection.outlook.com'))) {
-            services.exchange = true;
-        }
+        const hasExchange = mxRecords && mxRecords.some(r => r.data && r.data.toLowerCase().includes('mail.protection.outlook.com'));
+        if (hasExchange) services.exchange = true;
 
-        // SPF (TXT contains include:spf.protection.outlook.com)
+        // SPF — always check (relevant for any domain that might send email)
         const txtRecords = txt.status === 'fulfilled' ? txt.value : null;
-        if (txtRecords && txtRecords.some(r => r.data && r.data.toLowerCase().includes('spf.protection.outlook.com'))) {
-            services.spf = true;
-        }
+        const hasSpf = txtRecords && txtRecords.some(r => r.data && r.data.toLowerCase().includes('spf.protection.outlook.com'));
+        services.spf = !!hasSpf;
 
-        // DMARC
+        // DMARC — always check
         const dmarcRecords = dmarc.status === 'fulfilled' ? dmarc.value : null;
-        if (dmarcRecords && dmarcRecords.some(r => r.data && r.data.toLowerCase().includes('v=dmarc'))) {
-            services.dmarc = true;
-        }
+        const hasDmarc = dmarcRecords && dmarcRecords.some(r => r.data && r.data.toLowerCase().includes('v=dmarc'));
+        services.dmarc = !!hasDmarc;
 
-        // DKIM (selector1 or selector2)
+        // DKIM — always check (selector1 or selector2)
         const dkim1Records = dkim1.status === 'fulfilled' ? dkim1.value : null;
         const dkim2Records = dkim2.status === 'fulfilled' ? dkim2.value : null;
-        if ((dkim1Records && dkim1Records.length > 0) || (dkim2Records && dkim2Records.length > 0)) {
-            services.dkim = true;
-        }
+        const hasDkim = (dkim1Records && dkim1Records.length > 0) || (dkim2Records && dkim2Records.length > 0);
+        services.dkim = !!hasDkim;
 
         // Teams / Skype for Business (SRV _sipfederationtls._tcp)
         const sipRecords = sip.status === 'fulfilled' ? sip.value : null;
@@ -553,40 +552,81 @@
         const container = document.querySelector(`.tl-domain-badges[data-domain="${CSS.escape(domain)}"]`);
         if (!container) return;
         container.innerHTML = '';
-        for (const [key, active] of Object.entries(services)) {
-            if (!active || !SERVICE_ICONS[key]) continue;
+        for (const [key, value] of Object.entries(services)) {
+            if (value === undefined || !SERVICE_ICONS[key]) continue;
             const info = SERVICE_ICONS[key];
             const badge = document.createElement('span');
-            badge.className = 'tl-svc-badge';
-            badge.title = info.label;
-            badge.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i>`;
+            if (value) {
+                badge.className = 'tl-svc-badge tl-svc-ok';
+                badge.title = info.label + ' ✓';
+                badge.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i>`;
+            } else {
+                badge.className = 'tl-svc-badge tl-svc-missing';
+                badge.title = info.label + ' — missing';
+                badge.innerHTML = `<i class="fas ${info.icon}"></i>`;
+            }
             container.appendChild(badge);
         }
     }
 
     function renderDnsSummary(allServices, remaining) {
-        // Aggregate which services are found across any domain
+        // Aggregate: found (true somewhere), missing (false somewhere and never true)
         const found = {};
-        for (const svc of Object.values(allServices)) {
-            for (const [key, active] of Object.entries(svc)) {
-                if (active) found[key] = true;
+        const missing = {};
+        const missingDomains = {}; // key → [domains where it's missing]
+
+        for (const [domain, svc] of Object.entries(allServices)) {
+            for (const [key, value] of Object.entries(svc)) {
+                if (value === true) {
+                    found[key] = true;
+                } else if (value === false) {
+                    if (!missingDomains[key]) missingDomains[key] = [];
+                    missingDomains[key].push(domain);
+                }
             }
+        }
+        // Only flag as "missing" if it's false on at least one domain
+        for (const key of Object.keys(missingDomains)) {
+            missing[key] = true;
         }
 
         els.dnsResults.innerHTML = '';
 
-        if (Object.keys(found).length === 0) {
+        const allKeys = new Set([...Object.keys(found), ...Object.keys(missing)]);
+        if (allKeys.size === 0) {
             els.dnsResults.innerHTML = '<span class="tl-dns-none">No Microsoft 365 DNS records detected.</span>';
             return;
         }
 
-        for (const [key, _] of Object.entries(found)) {
+        // Show found services
+        for (const key of allKeys) {
             const info = SERVICE_ICONS[key];
             if (!info) continue;
-            const pill = document.createElement('span');
-            pill.className = 'tl-dns-pill';
-            pill.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i> ${escapeHtml(info.label)}`;
-            els.dnsResults.appendChild(pill);
+            if (found[key]) {
+                const pill = document.createElement('span');
+                pill.className = 'tl-dns-pill tl-dns-ok';
+                pill.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i> ${escapeHtml(info.label)}`;
+                els.dnsResults.appendChild(pill);
+            }
+        }
+
+        // Show missing email security warnings (only spf, dmarc, dkim — these are actionable)
+        const SECURITY_CHECKS = ['spf', 'dmarc', 'dkim'];
+        const warnings = SECURITY_CHECKS.filter(k => missing[k] && missingDomains[k] && missingDomains[k].length > 0);
+        if (warnings.length > 0) {
+            const warnWrap = document.createElement('div');
+            warnWrap.className = 'tl-dns-warnings';
+            for (const key of warnings) {
+                const info = SERVICE_ICONS[key];
+                const domains = missingDomains[key];
+                const warnPill = document.createElement('span');
+                warnPill.className = 'tl-dns-pill tl-dns-warn';
+                warnPill.title = 'Missing on: ' + domains.join(', ');
+                warnPill.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${escapeHtml(info.label)} missing` +
+                    (domains.length === 1 ? ` on ${escapeHtml(domains[0])}` : ` on ${domains.length} domain${domains.length > 1 ? 's' : ''}`);
+                warnWrap.appendChild(warnPill);
+            }
+            els.dnsResults.appendChild(warnWrap);
         }
 
         if (remaining > 0) {

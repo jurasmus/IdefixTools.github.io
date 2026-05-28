@@ -669,6 +669,16 @@
     cursor: default;
 }
 
+.tl-svc-badge.tl-svc-missing {
+    color: #e87474;
+    border-color: rgba(220, 80, 80, 0.35);
+    background: rgba(220, 80, 80, 0.08);
+}
+
+.tl-svc-badge.tl-svc-missing i {
+    opacity: 0.7;
+}
+
 /* ---- DNS Section ---- */
 .tl-dns-section {
     margin-top: 1.5rem;
@@ -715,6 +725,26 @@
     font-size: 0.78rem;
     font-weight: 600;
     color: var(--text-dark);
+}
+
+.tl-dns-pill.tl-dns-warn {
+    background: rgba(220, 80, 80, 0.08);
+    border-color: rgba(220, 80, 80, 0.35);
+    color: #e87474;
+}
+
+.tl-dns-pill.tl-dns-warn i {
+    color: #e87474;
+}
+
+.tl-dns-warnings {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
 }
 
 .tl-dns-none {
