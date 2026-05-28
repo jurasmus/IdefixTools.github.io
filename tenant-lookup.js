@@ -54,7 +54,7 @@
     // DNS service detection labels
     const SERVICE_ICONS = {
         exchange:  { icon: 'fa-envelope',          label: 'Exchange Online',   color: '#0078d4' },
-        spf:       { icon: 'fa-shield-halved',     label: 'SPF (EXO)',         color: '#107c10' },
+        spf:       { icon: 'fa-shield-halved',     label: 'SPF',               color: '#107c10' },
         dmarc:     { icon: 'fa-user-shield',       label: 'DMARC',             color: '#5c2d91' },
         dkim:      { icon: 'fa-key',               label: 'DKIM',              color: '#008272' },
         teams:     { icon: 'fa-video',             label: 'Teams / SfB',       color: '#6264a7' },
@@ -429,6 +429,7 @@
     // ---- Extended info (domains + DNS) — loaded after main card renders ----
     async function loadExtendedInfo(result) {
         const { identifier, domain, graphInfo, realm, config } = result;
+        const tenantId = (graphInfo && graphInfo.tenantId) || extractTenantIdFromUrl(config.issuer) || '';
 
         // Collect known domains from all sources we already have
         const knownDomains = new Set();
@@ -451,26 +452,43 @@
             knownDomains.add(`${tenantName}.mail.onmicrosoft.com`);
         }
 
-        // Determine domain to use for Autodiscover
-        const lookupDomain = domain
-            || (graphInfo && graphInfo.defaultDomainName)
-            || null;
-
         // Show domains section with loading state
         els.domainsSection.hidden = false;
         els.domainsLoading.hidden = false;
         els.domainsError.hidden = true;
         els.domainsList.innerHTML = '';
 
-        // Try Autodiscover for additional domains (may return only queried domain now)
-        if (lookupDomain) {
-            try {
-                const domainsData = await fetchTenantDomains(lookupDomain);
-                if (domainsData && domainsData.domains) {
-                    domainsData.domains.forEach(d => knownDomains.add(d.toLowerCase()));
-                }
-            } catch (err) {
-                console.warn('Autodiscover domain enumeration failed:', err);
+        // Try Autodiscover for each known domain — each may return different additional domains
+        const domainsToProbe = [...knownDomains].filter(d => !d.endsWith('.onmicrosoft.com'));
+        const autodiscoverPromises = domainsToProbe.map(d =>
+            fetchTenantDomains(d).catch(() => null)
+        );
+        const autodiscoverResults = await Promise.allSettled(autodiscoverPromises);
+        for (const r of autodiscoverResults) {
+            if (r.status === 'fulfilled' && r.value && r.value.domains) {
+                r.value.domains.forEach(d => knownDomains.add(d.toLowerCase()));
+            }
+        }
+
+        // If defaultDomainName is a custom domain, try to discover the .onmicrosoft.com name
+        // by probing OIDC for each discovered domain to find a *.onmicrosoft.com one
+        if (!onmicroMatch && tenantId) {
+            // Try a common pattern: lowercase displayName with spaces/special chars removed
+            const displayName = (graphInfo && graphInfo.displayName) || '';
+            const guessName = displayName.replace(/[^a-z0-9]/gi, '').toLowerCase();
+            if (guessName.length >= 3) {
+                try {
+                    const probeUrl = `https://login.microsoftonline.com/${encodeURIComponent(guessName + '.onmicrosoft.com')}/v2.0/.well-known/openid-configuration`;
+                    const probeResp = await fetch(probeUrl, { method: 'GET', mode: 'cors' });
+                    if (probeResp.ok) {
+                        const probeConfig = await probeResp.json();
+                        const probeTid = extractTenantIdFromUrl(probeConfig.issuer);
+                        if (probeTid && probeTid.toLowerCase() === tenantId.toLowerCase()) {
+                            knownDomains.add(`${guessName}.onmicrosoft.com`);
+                            knownDomains.add(`${guessName}.mail.onmicrosoft.com`);
+                        }
+                    }
+                } catch { /* probe failed, that's fine */ }
             }
         }
 
@@ -510,11 +528,19 @@
             li.appendChild(nameSpan);
 
             // Badges container for DNS results (filled later)
-            const badges = document.createElement('span');
+            const badges = document.createElement('div');
             badges.className = 'tl-domain-badges';
             badges.dataset.domain = d;
-            li.appendChild(badges);
 
+            // Show a placeholder while DNS checks run
+            if (!d.endsWith('.onmicrosoft.com')) {
+                const placeholder = document.createElement('span');
+                placeholder.className = 'tl-badge-placeholder';
+                placeholder.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking DNS…';
+                badges.appendChild(placeholder);
+            }
+
+            li.appendChild(badges);
             els.domainsList.appendChild(li);
         });
     }
@@ -552,20 +578,41 @@
         const container = document.querySelector(`.tl-domain-badges[data-domain="${CSS.escape(domain)}"]`);
         if (!container) return;
         container.innerHTML = '';
-        for (const [key, value] of Object.entries(services)) {
-            if (value === undefined || !SERVICE_ICONS[key]) continue;
+
+        // Service badges (only shown when detected)
+        const svcKeys = ['exchange', 'teams', 'intune', 'aadConnect'];
+        const svcWrap = document.createElement('div');
+        svcWrap.className = 'tl-badge-row tl-badge-services';
+        for (const key of svcKeys) {
+            if (services[key] !== true || !SERVICE_ICONS[key]) continue;
             const info = SERVICE_ICONS[key];
             const badge = document.createElement('span');
-            if (value) {
-                badge.className = 'tl-svc-badge tl-svc-ok';
-                badge.title = info.label + ' ✓';
-                badge.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i>`;
-            } else {
-                badge.className = 'tl-svc-badge tl-svc-missing';
-                badge.title = info.label + ' — missing';
-                badge.innerHTML = `<i class="fas ${info.icon}"></i>`;
+            badge.className = 'tl-svc-tag';
+            badge.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i> ${escapeHtml(info.label)}`;
+            svcWrap.appendChild(badge);
+        }
+        if (svcWrap.children.length > 0) container.appendChild(svcWrap);
+
+        // Email security badges (always shown: pass or fail)
+        const emailKeys = ['spf', 'dmarc', 'dkim'];
+        const hasAnyEmail = emailKeys.some(k => services[k] !== undefined);
+        if (hasAnyEmail) {
+            const emailWrap = document.createElement('div');
+            emailWrap.className = 'tl-badge-row tl-badge-email';
+            for (const key of emailKeys) {
+                if (services[key] === undefined) continue;
+                const info = SERVICE_ICONS[key];
+                const badge = document.createElement('span');
+                if (services[key]) {
+                    badge.className = 'tl-email-tag tl-email-pass';
+                    badge.innerHTML = `<i class="fas fa-circle-check"></i> ${escapeHtml(info.label)}`;
+                } else {
+                    badge.className = 'tl-email-tag tl-email-fail';
+                    badge.innerHTML = `<i class="fas fa-circle-xmark"></i> ${escapeHtml(info.label)}`;
+                }
+                emailWrap.appendChild(badge);
             }
-            container.appendChild(badge);
+            container.appendChild(emailWrap);
         }
     }
 
@@ -598,35 +645,64 @@
             return;
         }
 
-        // Show found services
-        for (const key of allKeys) {
-            const info = SERVICE_ICONS[key];
-            if (!info) continue;
-            if (found[key]) {
+        // Section 1: Detected M365 Services
+        const svcKeys = ['exchange', 'teams', 'intune', 'aadConnect'];
+        const foundSvcKeys = svcKeys.filter(k => found[k]);
+        if (foundSvcKeys.length > 0) {
+            const svcBox = document.createElement('div');
+            svcBox.className = 'tl-dns-category';
+            svcBox.innerHTML = '<h5><i class="fas fa-cloud"></i> Microsoft 365 Services</h5>';
+            const pills = document.createElement('div');
+            pills.className = 'tl-dns-pills';
+            for (const key of foundSvcKeys) {
+                const info = SERVICE_ICONS[key];
+                if (!info) continue;
                 const pill = document.createElement('span');
                 pill.className = 'tl-dns-pill tl-dns-ok';
                 pill.innerHTML = `<i class="fas ${info.icon}" style="color:${info.color}"></i> ${escapeHtml(info.label)}`;
-                els.dnsResults.appendChild(pill);
+                pills.appendChild(pill);
             }
+            svcBox.appendChild(pills);
+            els.dnsResults.appendChild(svcBox);
         }
 
-        // Show missing email security warnings (only spf, dmarc, dkim — these are actionable)
+        // Section 2: Email Security Health
         const SECURITY_CHECKS = ['spf', 'dmarc', 'dkim'];
-        const warnings = SECURITY_CHECKS.filter(k => missing[k] && missingDomains[k] && missingDomains[k].length > 0);
-        if (warnings.length > 0) {
-            const warnWrap = document.createElement('div');
-            warnWrap.className = 'tl-dns-warnings';
-            for (const key of warnings) {
-                const info = SERVICE_ICONS[key];
-                const domains = missingDomains[key];
-                const warnPill = document.createElement('span');
-                warnPill.className = 'tl-dns-pill tl-dns-warn';
-                warnPill.title = 'Missing on: ' + domains.join(', ');
-                warnPill.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${escapeHtml(info.label)} missing` +
-                    (domains.length === 1 ? ` on ${escapeHtml(domains[0])}` : ` on ${domains.length} domain${domains.length > 1 ? 's' : ''}`);
-                warnWrap.appendChild(warnPill);
+        const hasAnyEmailCheck = SECURITY_CHECKS.some(k => found[k] || missing[k]);
+        if (hasAnyEmailCheck) {
+            const emailBox = document.createElement('div');
+            emailBox.className = 'tl-dns-category';
+            emailBox.innerHTML = '<h5><i class="fas fa-shield-halved"></i> Email Security Health</h5>';
+
+            const allPassed = SECURITY_CHECKS.every(k => found[k] && !missing[k]);
+
+            if (allPassed) {
+                const overall = document.createElement('div');
+                overall.className = 'tl-email-health tl-email-health-good';
+                overall.innerHTML = '<i class="fas fa-circle-check"></i> All email security records properly configured across all domains';
+                emailBox.appendChild(overall);
             }
-            els.dnsResults.appendChild(warnWrap);
+
+            const pills = document.createElement('div');
+            pills.className = 'tl-dns-pills';
+            for (const key of SECURITY_CHECKS) {
+                const info = SERVICE_ICONS[key];
+                if (!info) continue;
+                const pill = document.createElement('span');
+                if (found[key] && !missing[key]) {
+                    pill.className = 'tl-dns-pill tl-dns-ok';
+                    pill.innerHTML = `<i class="fas fa-circle-check"></i> ${escapeHtml(info.label)}`;
+                } else if (missing[key]) {
+                    const domains = missingDomains[key] || [];
+                    pill.className = 'tl-dns-pill tl-dns-warn';
+                    pill.title = 'Missing on: ' + domains.join(', ');
+                    pill.innerHTML = `<i class="fas fa-circle-xmark"></i> ${escapeHtml(info.label)} missing` +
+                        (domains.length === 1 ? ` on ${escapeHtml(domains[0])}` : ` on ${domains.length} domain${domains.length > 1 ? 's' : ''}`);
+                }
+                pills.appendChild(pill);
+            }
+            emailBox.appendChild(pills);
+            els.dnsResults.appendChild(emailBox);
         }
 
         if (remaining > 0) {
