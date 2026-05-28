@@ -79,19 +79,12 @@
             orgName:        $('fOrgName'),
             domainWrap:     $('fDomainWrap'),
             domain:         $('fDomain'),
-            namespaceWrap:  $('fNamespaceWrap'),
-            namespace:      $('fNamespace'),
             tenantId:       $('fTenantId'),
             cloudInstance:  $('fCloudInstance'),
             cloudType:      $('fCloudType'),
             regionScope:    $('fRegionScope'),
-            regionSubScope: $('fRegionSubScope'),
-            region:         $('fRegion'),
             ssoWrap:        $('fSsoWrap'),
             sso:            $('fSso'),
-            fedDetailsWrap: $('fFedDetailsWrap'),
-            fedAuthUrl:     $('fFedAuthUrl'),
-            fedProtocol:    $('fFedProtocol'),
             issuer:         $('fIssuer'),
             authEndpoint:   $('fAuthEndpoint'),
             tokenEndpoint:  $('fTokenEndpoint')
@@ -375,10 +368,8 @@
         toggleField(els.f.domainWrap, !!queriedDomain);
         if (queriedDomain) els.f.domain.textContent = queriedDomain;
 
-        // Namespace type (only from UserRealm / domain mode)
+        // Namespace type (used internally for federation check)
         const ns = realm && realm.NameSpaceType ? realm.NameSpaceType : null;
-        toggleField(els.f.namespaceWrap, !!ns);
-        if (ns) els.f.namespace.textContent = NAMESPACE_LABELS[ns] || ns;
 
         // Desktop SSO
         if (credType) {
@@ -389,25 +380,13 @@
             toggleField(els.f.ssoWrap, false);
         }
 
-        // Federation details (from UserRealm, only when Federated)
-        const isFederated = ns === 'Federated';
-        const authUrl = realm && realm.AuthURL ? realm.AuthURL : null;
-        const fedProtocol = realm && realm.FederationProtocol ? realm.FederationProtocol : null;
-        toggleField(els.f.fedDetailsWrap, isFederated && (authUrl || fedProtocol));
-        if (authUrl) els.f.fedAuthUrl.textContent = authUrl;
-        if (fedProtocol) els.f.fedProtocol.textContent = fedProtocol;
-
         // Core OIDC fields
         els.f.tenantId.textContent      = (graphInfo && graphInfo.tenantId) || issuerTid || '—';
         els.f.cloudInstance.textContent = cloud.host;
         els.f.cloudType.textContent     = cloud.type;
 
         const scope = config.tenant_region_scope || '—';
-        const sub   = config.tenant_region_sub_scope || '—';
-        const region= config.tenant_region || '—';
         els.f.regionScope.textContent    = scope === '—' ? '—' : `${scope} — ${REGION_SCOPES[scope] || 'Unknown'}`;
-        els.f.regionSubScope.textContent = sub;
-        els.f.region.textContent         = region;
         els.f.issuer.textContent         = config.issuer || '—';
         els.f.authEndpoint.textContent   = config.authorization_endpoint || '—';
         els.f.tokenEndpoint.textContent  = config.token_endpoint || '—';

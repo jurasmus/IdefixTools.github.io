@@ -109,20 +109,9 @@
                         <span class="tl-field-label">Queried Domain</span>
                         <span class="tl-field-value" id="fDomain">—</span>
                     </div>
-                    <div class="tl-field" id="fNamespaceWrap" hidden>
-                        <span class="tl-field-label">Namespace Type</span>
-                        <span class="tl-field-value" id="fNamespace">—</span>
-                    </div>
                     <div class="tl-field" id="fSsoWrap" hidden>
                         <span class="tl-field-label">Desktop SSO (Seamless SSO)</span>
                         <span class="tl-field-value" id="fSso">—</span>
-                    </div>
-                    <div class="tl-field tl-field-wide" id="fFedDetailsWrap" hidden>
-                        <span class="tl-field-label">Federation Details</span>
-                        <span class="tl-field-value">
-                            <span class="tl-fed-row"><strong>Auth URL:</strong> <span class="tl-mono" id="fFedAuthUrl">—</span></span>
-                            <span class="tl-fed-row"><strong>Protocol:</strong> <span id="fFedProtocol">—</span></span>
-                        </span>
                     </div>
                     <div class="tl-field">
                         <span class="tl-field-label">Tenant ID</span>
@@ -140,26 +129,23 @@
                         <span class="tl-field-label">Tenant Region Scope</span>
                         <span class="tl-field-value" id="fRegionScope">—</span>
                     </div>
-                    <div class="tl-field">
-                        <span class="tl-field-label">Region Sub-Scope</span>
-                        <span class="tl-field-value" id="fRegionSubScope">—</span>
-                    </div>
-                    <div class="tl-field">
-                        <span class="tl-field-label">Tenant Region</span>
-                        <span class="tl-field-value" id="fRegion">—</span>
-                    </div>
-                    <div class="tl-field tl-field-wide">
-                        <span class="tl-field-label">Issuer</span>
-                        <span class="tl-field-value tl-mono" id="fIssuer">—</span>
-                    </div>
-                    <div class="tl-field tl-field-wide">
-                        <span class="tl-field-label">Authorization Endpoint</span>
-                        <span class="tl-field-value tl-mono" id="fAuthEndpoint">—</span>
-                    </div>
-                    <div class="tl-field tl-field-wide">
-                        <span class="tl-field-label">Token Endpoint</span>
-                        <span class="tl-field-value tl-mono" id="fTokenEndpoint">—</span>
-                    </div>
+                    <details class="tl-field tl-field-wide tl-endpoints-toggle">
+                        <summary class="tl-field-label"><i class="fas fa-link"></i> OIDC Endpoints</summary>
+                        <div class="tl-endpoints-list">
+                            <div class="tl-endpoint-row">
+                                <span class="tl-endpoint-label">Issuer</span>
+                                <span class="tl-field-value tl-mono" id="fIssuer">—</span>
+                            </div>
+                            <div class="tl-endpoint-row">
+                                <span class="tl-endpoint-label">Authorization</span>
+                                <span class="tl-field-value tl-mono" id="fAuthEndpoint">—</span>
+                            </div>
+                            <div class="tl-endpoint-row">
+                                <span class="tl-endpoint-label">Token</span>
+                                <span class="tl-field-value tl-mono" id="fTokenEndpoint">—</span>
+                            </div>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- Registered Domains -->

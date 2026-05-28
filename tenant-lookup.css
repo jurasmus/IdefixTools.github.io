@@ -344,6 +344,75 @@
 }
 
 /* ---- Extra (Graph) ---- */
+
+/* ---- Collapsible OIDC Endpoints ---- */
+.tl-endpoints-toggle {
+    cursor: default;
+    padding: 0;
+}
+
+.tl-endpoints-toggle summary {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-light);
+    transition: var(--transition);
+    list-style: none;
+}
+
+.tl-endpoints-toggle summary::-webkit-details-marker { display: none; }
+
+.tl-endpoints-toggle summary::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.65rem;
+    margin-left: auto;
+    transition: transform 0.2s;
+    color: var(--text-light);
+}
+
+.tl-endpoints-toggle[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.tl-endpoints-toggle summary:hover {
+    color: var(--accent);
+}
+
+.tl-endpoints-toggle summary i {
+    color: var(--accent);
+    font-size: 0.75rem;
+}
+
+.tl-endpoints-list {
+    padding: 0 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tl-endpoint-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.tl-endpoint-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+}
+
+/* ---- Extra (Graph) ---- */
 .tl-extra {
     margin-top: 1.75rem;
     padding: 1.25rem;
