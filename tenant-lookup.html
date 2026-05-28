@@ -113,6 +113,17 @@
                         <span class="tl-field-label">Namespace Type</span>
                         <span class="tl-field-value" id="fNamespace">—</span>
                     </div>
+                    <div class="tl-field" id="fSsoWrap" hidden>
+                        <span class="tl-field-label">Desktop SSO (Seamless SSO)</span>
+                        <span class="tl-field-value" id="fSso">—</span>
+                    </div>
+                    <div class="tl-field tl-field-wide" id="fFedDetailsWrap" hidden>
+                        <span class="tl-field-label">Federation Details</span>
+                        <span class="tl-field-value">
+                            <span class="tl-fed-row"><strong>Auth URL:</strong> <span class="tl-mono" id="fFedAuthUrl">—</span></span>
+                            <span class="tl-fed-row"><strong>Protocol:</strong> <span id="fFedProtocol">—</span></span>
+                        </span>
+                    </div>
                     <div class="tl-field">
                         <span class="tl-field-label">Tenant ID</span>
                         <span class="tl-field-value tl-mono" id="fTenantId">—</span>
@@ -151,9 +162,32 @@
                     </div>
                 </div>
 
+                <!-- Registered Domains -->
+                <div id="domainsSection" class="tl-domains-section" hidden>
+                    <div class="tl-domains-header">
+                        <h4><i class="fas fa-globe"></i> Registered Domains <span class="tl-domains-count" id="domainsCount">0</span></h4>
+                        <span id="domainsLoading" class="tl-domains-loading" hidden>
+                            <i class="fas fa-spinner fa-spin"></i> Enumerating…
+                        </span>
+                    </div>
+                    <p id="domainsError" class="tl-domains-error" hidden></p>
+                    <ul id="domainsList" class="tl-domains-list"></ul>
+                </div>
+
+                <!-- DNS Service Detection -->
+                <div id="dnsSection" class="tl-dns-section" hidden>
+                    <div class="tl-dns-header">
+                        <h4><i class="fas fa-server"></i> Detected Microsoft 365 Services</h4>
+                        <span id="dnsLoading" class="tl-domains-loading" hidden>
+                            <i class="fas fa-spinner fa-spin"></i> Checking DNS…
+                        </span>
+                    </div>
+                    <div id="dnsResults" class="tl-dns-results"></div>
+                </div>
+
                 <!-- Raw JSON -->
                 <details class="tl-raw">
-                    <summary><i class="fas fa-code"></i> Raw OpenID Configuration</summary>
+                    <summary><i class="fas fa-code"></i> Raw JSON (all endpoints)</summary>
                     <pre id="rawJson" class="tl-pre">{}</pre>
                 </details>
             </div>
@@ -169,8 +203,18 @@
             <p>
                 <strong>By domain:</strong> additionally queries <code>GetUserRealm.srf</code> which returns the
                 organization's <em>FederationBrandName</em> (display name), namespace type (Managed / Federated)
-                and verified primary domain. This is the same public endpoint Microsoft's own sign-in pages use
-                to look up tenant branding before authentication.
+                and verified primary domain. Also detects <strong>Desktop SSO</strong> (Seamless SSO) via
+                <code>GetCredentialType</code>.
+            </p>
+            <p>
+                <strong>Domain enumeration:</strong> uses the Exchange Autodiscover
+                <code>GetFederationInformation</code> SOAP endpoint to list <em>all verified domains</em>
+                registered to the tenant. This is a public, unauthenticated endpoint.
+            </p>
+            <p>
+                <strong>DNS service detection:</strong> checks MX, SPF, DMARC, DKIM, SRV, and CNAME records
+                via DNS-over-HTTPS to detect which Microsoft 365 services (Exchange Online, Teams, Intune, etc.)
+                are configured for each domain.
             </p>
             <ul class="tl-bullets">
                 <li><strong>Worldwide (Commercial):</strong> <code>login.microsoftonline.com</code></li>
