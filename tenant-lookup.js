@@ -180,6 +180,12 @@
             catch (e) { console.warn('Graph proxy lookup failed:', e); }
         }
 
+        // For GUID lookups, try SSO detection using the default domain from Graph
+        if (!domain && graphInfo && graphInfo.defaultDomainName) {
+            try { credType = await fetchCredentialType(graphInfo.defaultDomainName); }
+            catch (e) { console.warn('GetCredentialType failed:', e); }
+        }
+
         return { identifier, domain, config, cloud, realm, graphInfo, credType };
     }
 
@@ -258,12 +264,21 @@
         };
     }
 
+    // Fetch with timeout helper
+    function fetchWithTimeout(url, opts, ms) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), ms);
+        return fetch(url, { ...opts, signal: controller.signal })
+            .finally(() => clearTimeout(timer));
+    }
+
     // Fetch all verified domains for a tenant via Autodiscover (backend proxy)
     async function fetchTenantDomains(domain) {
-        const resp = await fetch(`${DOMAINS_API}/${encodeURIComponent(domain)}`, {
-            method: 'GET',
-            mode: 'cors'
-        });
+        const resp = await fetchWithTimeout(
+            `${DOMAINS_API}/${encodeURIComponent(domain)}`,
+            { method: 'GET', mode: 'cors' },
+            15000
+        );
         if (!resp.ok) return null;
         return resp.json();
     }
@@ -414,13 +429,33 @@
 
     // ---- Extended info (domains + DNS) — loaded after main card renders ----
     async function loadExtendedInfo(result) {
-        const { domain, graphInfo } = result;
-        // Determine the domain to use for Autodiscover enumeration
+        const { identifier, domain, graphInfo, realm, config } = result;
+
+        // Collect known domains from all sources we already have
+        const knownDomains = new Set();
+
+        // From Graph API
+        if (graphInfo && graphInfo.defaultDomainName) knownDomains.add(graphInfo.defaultDomainName.toLowerCase());
+
+        // From UserRealm
+        if (realm && realm.DomainName) knownDomains.add(realm.DomainName.toLowerCase());
+
+        // The queried domain itself
+        if (domain) knownDomains.add(domain.toLowerCase());
+
+        // Extract tenant name from defaultDomainName to probe .onmicrosoft.com patterns
+        const defaultDomain = (graphInfo && graphInfo.defaultDomainName) || '';
+        const onmicroMatch = defaultDomain.match(/^(.+)\.onmicrosoft\.com$/i);
+        if (onmicroMatch) {
+            const tenantName = onmicroMatch[1].toLowerCase();
+            knownDomains.add(`${tenantName}.onmicrosoft.com`);
+            knownDomains.add(`${tenantName}.mail.onmicrosoft.com`);
+        }
+
+        // Determine domain to use for Autodiscover
         const lookupDomain = domain
             || (graphInfo && graphInfo.defaultDomainName)
             || null;
-
-        if (!lookupDomain) return;
 
         // Show domains section with loading state
         els.domainsSection.hidden = false;
@@ -428,30 +463,40 @@
         els.domainsError.hidden = true;
         els.domainsList.innerHTML = '';
 
-        try {
-            const domainsData = await fetchTenantDomains(lookupDomain);
-            els.domainsLoading.hidden = true;
-
-            if (!domainsData || !domainsData.domains || domainsData.domains.length === 0) {
-                els.domainsError.hidden = false;
-                els.domainsError.textContent = 'Could not enumerate domains. The tenant may not have Exchange Online.';
-                return;
+        // Try Autodiscover for additional domains (may return only queried domain now)
+        if (lookupDomain) {
+            try {
+                const domainsData = await fetchTenantDomains(lookupDomain);
+                if (domainsData && domainsData.domains) {
+                    domainsData.domains.forEach(d => knownDomains.add(d.toLowerCase()));
+                }
+            } catch (err) {
+                console.warn('Autodiscover domain enumeration failed:', err);
             }
-
-            els.domainsCount.textContent = domainsData.count;
-            renderDomainsList(domainsData.domains);
-
-            // Update raw JSON with domain data
-            updateRawJson({ tenant_domains: domainsData });
-
-            // Start DNS detection for the first few domains (lazy loading)
-            loadDnsDetection(domainsData.domains);
-        } catch (err) {
-            console.warn('Domain enumeration failed:', err);
-            els.domainsLoading.hidden = true;
-            els.domainsError.hidden = false;
-            els.domainsError.textContent = 'Domain enumeration failed.';
         }
+
+        els.domainsLoading.hidden = true;
+
+        const allDomains = [...knownDomains].sort((a, b) => {
+            // Sort: custom domains first, then .onmicrosoft.com variants
+            const aMs = a.endsWith('.onmicrosoft.com') ? 1 : 0;
+            const bMs = b.endsWith('.onmicrosoft.com') ? 1 : 0;
+            if (aMs !== bMs) return aMs - bMs;
+            return a.localeCompare(b);
+        });
+
+        if (allDomains.length === 0) {
+            els.domainsError.hidden = false;
+            els.domainsError.textContent = 'No domains found for this tenant.';
+            return;
+        }
+
+        els.domainsCount.textContent = allDomains.length;
+        renderDomainsList(allDomains);
+        updateRawJson({ known_domains: allDomains });
+
+        // Start DNS detection for custom domains
+        loadDnsDetection(allDomains);
     }
 
     function renderDomainsList(domains) {
